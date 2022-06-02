@@ -197,7 +197,7 @@ class CausalGraph:
         pos = nx.circular_layout(g_to_be_drawn)
         nx.draw(g_to_be_drawn, pos=pos, with_labels=True, labels=self.labels, edge_color=colors)
         plt.draw()
-        plt.show()
+        # plt.show()
 
     def draw_pydot_graph(self):
         """Draw nx_graph if skel = False and draw nx_skel otherwise"""
@@ -209,4 +209,4 @@ class CausalGraph:
         img = mpimg.imread(fp, format='png')
         plt.axis('off')
         plt.imshow(img)
-        plt.show()
+        # plt.show()
