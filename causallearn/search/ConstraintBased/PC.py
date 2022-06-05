@@ -111,7 +111,9 @@ def mvpc_alg(data: ndarray, alpha: float, indep_test, correction_name: str, stab
              verbose: bool = False,
              show_progress: bool = True) -> CausalGraph:
 
-
+    """
+    missing value Peter-Clark Algorithm
+    """
     start = time.time()
 
     ## Step 1: detect the direct causes of missingness indicators
@@ -165,8 +167,6 @@ def mvpc_alg(data: ndarray, alpha: float, indep_test, correction_name: str, stab
     return cg
 
 
-#######################################################################################################################
-## *********** Functions for Step 1 ***********
 def get_prt_mpairs(data: ndarray, alpha: float, indep_test, stable: bool = True) -> Dict[str, list]:
     """
     Detect the parents of missingness indicators
@@ -176,11 +176,8 @@ def get_prt_mpairs(data: ndarray, alpha: float, indep_test, stable: bool = True)
     """
     prt_m = {'prt': [], 'm': []}
 
-    ## Get the index of missingness indicators
     m_indx = get_mindx(data)
 
-    ## Get the index of parents of missingness indicators
-    # If the missingness indicator has no parent, then it will not be collected in prt_m
     for r in m_indx:
         prt_r = detect_parent(r, data, alpha, indep_test, stable)
         if isempty(prt_r):
@@ -214,22 +211,14 @@ def detect_parent(r: int, data_: ndarray, alpha: float, indep_test, stable: bool
     """
     Detect the parents of a missingness indicator
     """
-    ## *********** Adaptation 0 ***********
-    # For avoid changing the original data
     data = data_.copy()
-    ## *********** End ***********
 
     assert type(data) == np.ndarray
     assert 0 < alpha < 1
 
-    ## *********** Adaptation 1 ***********
-    # data
-    ## Replace the variable r with its missingness indicator
-    ## If r is not a missingness indicator, return [].
     data[:, r] = np.isnan(data[:, r]).astype(float)  # True is missing; false is not missing
     if sum(data[:, r]) == 0 or sum(data[:, r]) == len(data[:, r]):
         return np.empty(0)
-    ## *********** End ***********
 
     no_of_var = data.shape[1]
     cg = CausalGraph(no_of_var)
@@ -246,12 +235,9 @@ def detect_parent(r: int, data_: ndarray, alpha: float, indep_test, stable: bool
         edge_removal = []
         for (x, y) in pair_of_variables:
 
-            ## *********** Adaptation 2 ***********
-            # the skeleton search
-            ## Only test which variable is the neighbor of r
             if x != r:
                 continue
-            ## *********** End ***********
+
 
             Neigh_x = cg.neighbors(x)
             if y not in Neigh_x:
@@ -282,12 +268,10 @@ def detect_parent(r: int, data_: ndarray, alpha: float, indep_test, stable: bool
             if edge1 is not None:
                 cg.G.remove_edge(edge1)
 
-    ## *********** Adaptation 3 ***********
-    ## extract the parent of r from the graph
+
     cg.to_nx_skeleton()
     cg_skel_adj = nx.to_numpy_array(cg.nx_skel).astype(int)
     prt = get_parent(r, cg_skel_adj)
-    ## *********** End ***********
 
     return prt
 
@@ -327,7 +311,6 @@ def skeleton_correction(data: ndarray, alpha: float, test_with_correction_name: 
     # No need of the correlation matrix if using test-wise deletion test
     cg.corr_mat = np.corrcoef(data, rowvar=False) if test_with_correction_name == "MV_Crtn_Fisher_Z" else []
     cg.prt_m = prt_m
-    ## *********** Adaption 1 ***********
 
     node_ids = range(no_of_var)
     pair_of_variables = list(permutations(node_ids, 2))
@@ -368,10 +351,6 @@ def skeleton_correction(data: ndarray, alpha: float, test_with_correction_name: 
 
     return cg
 
-
-#######################################################################################################################
-
-# *********** Evaluation util ***********
 
 def get_adjacancy_matrix(g: CausalGraph) -> ndarray:
     return nx.to_numpy_array(g.nx_graph).astype(int)
