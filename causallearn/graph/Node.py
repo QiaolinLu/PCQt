@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 # Represents an object with a name, node type, and position that can serve as a
 # node in a graph.

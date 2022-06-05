@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 # Implements a graph capable of storing edges of type N1 *-$ N2 where * and
 # $ are endpoints of type Endpoint.

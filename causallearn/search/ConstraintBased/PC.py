@@ -46,7 +46,7 @@ def pc_alg(data: ndarray, alpha: float, indep_test, stable: bool, uc_rule: int, 
     ----------
     data : data set (numpy ndarray), shape (n_samples, n_features). The input data, where n_samples is the number of samples and n_features is the number of features.
     alpha : float, desired significance level of independence tests (p_value) in (0,1)
-    indep_test : the function of the independence test being used
+    indep_test : 独立性检验
             [fisherz, chisq, gsq, kci]
            - fisherz: Fisher's Z conditional independence test
            - chisq: Chi-squared conditional independence test
@@ -123,8 +123,8 @@ def mvpc_alg(data: ndarray, alpha: float, indep_test, correction_name: str, stab
 
     Parameters
     ----------
-    data : data set (numpy ndarray), shape (n_samples, n_features). The input data, where n_samples is the number of samples and n_features is the number of features.
-    alpha :  float, desired significance level of independence tests (p_value) in (0,1)
+    data : data set (numpy ndarray)
+    alpha :  float, 置信度
     indep_test : name of the test-wise deletion independence test being used
             [mv_fisherz, mv_g_sq]
             - mv_fisherz: Fisher's Z conditional independence test

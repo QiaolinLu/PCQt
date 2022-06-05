@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 # Implements a basic node in a graph--that is, a node that is not itself a variable.
 from causallearn.graph.Node import Node
