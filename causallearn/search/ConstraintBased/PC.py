@@ -40,40 +40,32 @@ def pc_alg(data: ndarray, alpha: float, indep_test, stable: bool, uc_rule: int, 
            verbose: bool = False,
            show_progress: bool = True) -> CausalGraph:
     """
-    Perform Peter-Clark (PC) algorithm for causal discovery
-
     Parameters
     ----------
-    data : data set (numpy ndarray), shape (n_samples, n_features). The input data, where n_samples is the number of samples and n_features is the number of features.
-    alpha : float, desired significance level of independence tests (p_value) in (0,1)
+    data : data set (numpy ndarray)
+    alpha : float, p_value (0,1)
     indep_test : 独立性检验
             [fisherz, chisq, gsq, kci]
            - fisherz: Fisher's Z conditional independence test
            - chisq: Chi-squared conditional independence test
            - gsq: G-squared conditional independence test
            - kci: Kernel-based conditional independence test
-    stable : run stabilized skeleton discovery if True (default = True)
-    uc_rule : how unshielded colliders are oriented
+    uc_rule : 对撞屏蔽
            0: run uc_sepset
            1: run maxP
            2: run definiteMaxP
-    uc_priority : rule of resolving conflicts between unshielded colliders
+    uc_priority :未屏蔽对撞处理
            -1: whatever is default in uc_rule
            0: overwrite
            1: orient bi-directed
            2. prioritize existing colliders
            3. prioritize stronger colliders
            4. prioritize stronger* colliers
-    background_knowledge : background knowledge
     verbose : True iff verbose output should be printed.
     show_progress : True iff the algorithm progress should be show in console.
 
     Returns
     -------
-    cg : a CausalGraph object, where cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicates  i --> j ,
-                    cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicates i --- j,
-                    cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j.
-
     """
 
     start = time.time()
@@ -118,46 +110,7 @@ def mvpc_alg(data: ndarray, alpha: float, indep_test, correction_name: str, stab
              uc_priority: int, background_knowledge: BackgroundKnowledge | None = None,
              verbose: bool = False,
              show_progress: bool = True) -> CausalGraph:
-    """
-    Perform missing value Peter-Clark (PC) algorithm for causal discovery
 
-    Parameters
-    ----------
-    data : data set (numpy ndarray)
-    alpha :  float, 置信度
-    indep_test : name of the test-wise deletion independence test being used
-            [mv_fisherz, mv_g_sq]
-            - mv_fisherz: Fisher's Z conditional independence test
-            - mv_g_sq: G-squared conditional independence test (TODO: under development)
-    correction_name : correction_name: name of the missingness correction
-            [MV_Crtn_Fisher_Z, MV_Crtn_G_sq, MV_DRW_Fisher_Z, MV_DRW_G_sq]
-            - "MV_Crtn_Fisher_Z": Permutation based correction method
-            - "MV_Crtn_G_sq": G-squared conditional independence test (TODO: under development)
-            - "MV_DRW_Fisher_Z": density ratio weighting based correction method (TODO: under development)
-            - "MV_DRW_G_sq": G-squared conditional independence test (TODO: under development)
-    stable : run stabilized skeleton discovery if True (default = True)
-    uc_rule : how unshielded colliders are oriented
-           0: run uc_sepset
-           1: run maxP
-           2: run definiteMaxP
-    uc_priority : rule of resolving conflicts between unshielded colliders
-           -1: whatever is default in uc_rule
-           0: overwrite
-           1: orient bi-directed
-           2. prioritize existing colliders
-           3. prioritize stronger colliders
-           4. prioritize stronger* colliers
-    background_knowledge: background knowledge
-    verbose : True iff verbose output should be printed.
-    show_progress : True iff the algorithm progress should be show in console.
-
-    Returns
-    -------
-    cg : a CausalGraph object, where cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicates  i --> j ,
-                    cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicates i --- j,
-                    cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j.
-
-    """
 
     start = time.time()
 
@@ -174,11 +127,9 @@ def mvpc_alg(data: ndarray, alpha: float, indep_test, correction_name: str, stab
         orient_by_background_knowledge(cg_pre, background_knowledge)
 
     cg_pre.to_nx_skeleton()
-    # print('Finish skeleton search with test-wise deletion.')
 
     ## b) Correction of the extra edges
     cg_corr = skeleton_correction(data, alpha, correction_name, cg_pre, prt_m, stable)
-    # print('Finish missingness correction.')
 
     if background_knowledge is not None:
         orient_by_background_knowledge(cg_corr, background_knowledge)
@@ -220,12 +171,6 @@ def get_prt_mpairs(data: ndarray, alpha: float, indep_test, stable: bool = True)
     """
     Detect the parents of missingness indicators
     If a missingness indicator has no parent, it will not be included in the result
-    :param data: data set (numpy ndarray)
-    :param alpha: desired significance level in (0, 1) (float)
-    :param indep_test: name of the test-wise deletion independence test being used
-        - "MV_Fisher_Z": Fisher's Z conditional independence test
-        - "MV_G_sq": G-squared conditional independence test (TODO: under development)
-    :param stable: run stabilized skeleton discovery if True (default = True)
     :return:
     cg: a CausalGraph object
     """
@@ -252,8 +197,7 @@ def isempty(prt_r) -> bool:
 
 
 def get_mindx(data: ndarray) -> List[int]:
-    """Detect the parents of missingness indicators
-    :param data: data set (numpy ndarray)
+    """
     :return:
     m_indx: list, the index of missingness indicators
     """
@@ -267,21 +211,9 @@ def get_mindx(data: ndarray) -> List[int]:
 
 
 def detect_parent(r: int, data_: ndarray, alpha: float, indep_test, stable: bool = True) -> ndarray:
-    """Detect the parents of a missingness indicator
-    :param r: the missingness indicator
-    :param data_: data set (numpy ndarray)
-    :param alpha: desired significance level in (0, 1) (float)
-    :param indep_test: name of the test-wise deletion independence test being used
-        - "MV_Fisher_Z": Fisher's Z conditional independence test
-        - "MV_G_sq": G-squared conditional independence test (TODO: under development)
-    :param stable: run stabilized skeleton discovery if True (default = True)
-    : return:
-    prt: parent of the missingness indicator, r
     """
-    ## TODO: in the test-wise deletion CI test, if test between a binary and a continuous variable,
-    #  there can be the case where the binary variable only take one value after deletion.
-    #  It is because the assumption is violated.
-
+    Detect the parents of a missingness indicator
+    """
     ## *********** Adaptation 0 ***********
     # For avoid changing the original data
     data = data_.copy()
@@ -361,11 +293,8 @@ def detect_parent(r: int, data_: ndarray, alpha: float, indep_test, stable: bool
 
 
 def get_parent(r: int, cg_skel_adj: ndarray) -> ndarray:
-    """Get the neighbors of missingness indicators which are the parents
-    :param r: the missingness indicator index
-    :param cg_skel_adj: adjacancy matrix of a causal skeleton
-    :return:
-    prt: list, parents of the missingness indicator r
+    """
+    Get the neighbors of missingness indicators which are the parents
     """
     num_var = len(cg_skel_adj[0, :])
     indx = np.array([i for i in range(num_var)])
@@ -378,15 +307,8 @@ def get_parent(r: int, cg_skel_adj: ndarray) -> ndarray:
 
 def skeleton_correction(data: ndarray, alpha: float, test_with_correction_name: str, init_cg: CausalGraph, prt_m: dict,
                         stable: bool = True) -> CausalGraph:
-    """Perform skeleton discovery
-    :param data: data set (numpy ndarray)
-    :param alpha: desired significance level in (0, 1) (float)
-    :param test_with_correction_name: name of the independence test being used
-           - "MV_Crtn_Fisher_Z": Fisher's Z conditional independence test
-           - "MV_Crtn_G_sq": G-squared conditional independence test
-    :param stable: run stabilized skeleton discovery if True (default = True)
-    :return:
-    cg: a CausalGraph object
+    """
+    Perform skeleton discovery
     """
 
     assert type(data) == np.ndarray
