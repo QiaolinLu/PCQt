@@ -1,2 +1,3 @@
 # PCQt
-PC algorithm with pyqt
+Peter-Clark algorithm with pyqt5
+
